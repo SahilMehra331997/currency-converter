@@ -163,3 +163,51 @@ let country_list:Country= {
     "ZMK": "ZM",
     "ZWD": "ZW"
 }
+const btn=document.querySelector("button")as HTMLButtonElement;
+const display=document.querySelector(".exchange-rate")as HTMLDivElement
+const base_url = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024-03-02/v1/currencies";
+//Populate dropdown
+const dropdown=document.querySelector(".dropdown")as HTMLDivElement;
+const dropselect=document.querySelectorAll(".dropdown select")as NodeListOf<HTMLSelectElement>
+
+for(let select of dropselect)
+  for(let country in country_list)
+     {
+        let newopt:HTMLOptionElement = document.createElement("option");
+        newopt.innerText=country;
+        newopt.value=country;
+        if(select.name==="from" && country==="USD")
+        newopt.selected=true;
+        if(select.name==="to" && country==="INR")
+        newopt.selected=true;
+      select.append(newopt);
+      select.addEventListener("change",(evt)=>{updateflag(evt.target)})
+     }
+   
+     //Change Flag
+   const updateflag = (element:any)=>{
+   let currcode= element.value;
+   let country=country_list[currcode].toLowerCase()
+   let src=`https://flagcdn.com/48x36/${country}.png`
+   element.parentElement.querySelector("img").src=src; 
+ }
+
+ btn.addEventListener("click",async (evt:MouseEvent)=>{
+    evt.preventDefault();
+    let inputvalue = document.querySelector("input") as HTMLInputElement;
+    let amount:number=parseInt(inputvalue.value);
+    if(inputvalue.value===''|| parseInt(inputvalue.value) < 1){
+    inputvalue.value='1';
+    amount=1;
+    }
+    const fromcurrency=document.querySelector(".from select") as HTMLSelectElement
+    const from:string =  fromcurrency.value.toLowerCase();
+    const tocurrency=document.querySelector(".to select") as HTMLSelectElement
+    const to:string =  tocurrency.value.toLowerCase();
+    const response=await fetch(`${base_url}/${from}.json`)
+    const data = await response.json();
+    const rate:number = data[from][to];
+    display.innerText=(rate*amount).toFixed(4);
+ })
+
+
